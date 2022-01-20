@@ -1,5 +1,6 @@
 package by.kosolobov.barbershop.model.dao;
 
+import by.kosolobov.barbershop.exception.DaoException;
 import by.kosolobov.barbershop.model.entity.User;
 import by.kosolobov.barbershop.model.mapper.EntityMapper;
 import org.apache.logging.log4j.Level;
@@ -11,7 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static by.kosolobov.barbershop.model.sql.DatabaseNameBox.*;
+import static by.kosolobov.barbershop.model.dao.DatabaseNameBox.*;
 
 public class UserDao {
     private static final Logger log = LogManager.getLogger(UserDao.class);
@@ -33,13 +34,13 @@ public class UserDao {
 
     private UserDao() {}
 
-    public List<User> selectAllBarbers() {
+    public List<User> selectAllBarbers() throws DaoException {
         return EntityMapper.mapUser(dao.select(TABLE_USER, COLUMNS_USER)
                 .where(COLUMN_USER_ROLE, BARBER_ROLE)
                 .executeSql(COLUMNS_USER));
     }
 
-    public Optional<User> selectUserByUsername(String username) {
+    public Optional<User> selectUserByUsername(String username) throws DaoException {
         try {
             List<User> res = EntityMapper.mapUser(dao.select(TABLE_USER, COLUMNS_USER)
                     .where(COLUMN_USERNAME, username)
@@ -56,7 +57,7 @@ public class UserDao {
         return Optional.empty();
     }
 
-    public Optional<String> selectPassword(String username) {
+    public Optional<String> selectPassword(String username) throws DaoException {
         List<Map<String, String>> entities = dao.select(TABLE_USER, COLUMN_PASSWORD)
                 .where(COLUMN_USERNAME, username)
                 .executeSql(COLUMN_PASSWORD);
@@ -68,7 +69,7 @@ public class UserDao {
         }
     }
 
-    public boolean updatePassword(String username, String oldPass, String newPass) {
+    public boolean updatePassword(String username, String oldPass, String newPass) throws DaoException {
         return dao.update(TABLE_USER)
                 .set(COLUMN_PASSWORD, newPass)
                 .where(COLUMN_USERNAME, username)
@@ -76,48 +77,48 @@ public class UserDao {
                 .execute();
     }
 
-    public boolean updateUsername(String oldUsername, String newUsername) {
+    public boolean updateUsername(String oldUsername, String newUsername) throws DaoException {
         return updateUser(oldUsername, COLUMN_USERNAME, newUsername);
     }
 
-    public boolean updateFirstName(String username, String first) {
+    public boolean updateFirstName(String username, String first) throws DaoException {
         return updateUser(username, COLUMN_FIRST_NAME, first);
     }
 
-    public boolean updateSecondName(String username, String second) {
+    public boolean updateSecondName(String username, String second) throws DaoException {
         return updateUser(username, COLUMN_SECOND_NAME, second);
     }
 
-    public boolean updateSurName(String username, String sur) {
+    public boolean updateSurName(String username, String sur) throws DaoException {
         return updateUser(username, COLUMN_SUR_NAME, sur);
     }
 
-    public boolean updateEmail(String username, String email) {
+    public boolean updateEmail(String username, String email) throws DaoException {
         return updateUser(username, COLUMN_EMAIL, email);
     }
 
-    public boolean updatePhone(String username, String phone) {
+    public boolean updatePhone(String username, String phone) throws DaoException {
         return updateUser(username, COLUMN_PHONE, phone);
     }
 
-    public boolean updateUserDesc(String username, String desc) {
+    public boolean updateUserDesc(String username, String desc) throws DaoException {
         return updateUser(username, COLUMN_DESC, desc);
     }
 
-    private boolean updateUser(String username, String column, String value) {
+    private boolean updateUser(String username, String column, String value) throws DaoException {
         return dao.update(TABLE_USER)
                 .set(column, value)
                 .where(COLUMN_USERNAME, username)
                 .execute();
     }
 
-    public boolean insertUser(String username, String password, String userRole) {
+    public boolean insertUser(String username, String password, String userRole) throws DaoException {
         return dao.insert(TABLE_USER, COLUMNS_USER_MIN)
                 .values(username, password, userRole)
                 .execute();
     }
 
-    public boolean deleteUser(String username, String password) {
+    public boolean deleteUser(String username, String password) throws DaoException {
         return dao.delete(TABLE_USER)
                 .where(COLUMN_USERNAME, username)
                 .andWhere(COLUMN_PASSWORD, password)

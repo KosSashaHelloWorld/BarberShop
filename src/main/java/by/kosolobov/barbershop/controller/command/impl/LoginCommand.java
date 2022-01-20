@@ -1,15 +1,22 @@
 package by.kosolobov.barbershop.controller.command.impl;
 
 import by.kosolobov.barbershop.controller.command.Command;
+import by.kosolobov.barbershop.exception.DaoException;
+import by.kosolobov.barbershop.exception.ServiceException;
 import by.kosolobov.barbershop.model.dao.UserDao;
 import by.kosolobov.barbershop.model.entity.User;
+import by.kosolobov.barbershop.model.service.UserService;
 import by.kosolobov.barbershop.util.Cryptographer;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
 
 public class LoginCommand implements Command {
+    private static final Logger log = LogManager.getLogger(LoginCommand.class);
     private static final String LOGIN_PAGE = "jsp/login.jsp";
     private static final String PROFILE_PAGE = "jsp/client/person.jsp";
     private static final String USER_ID = "user_id";
@@ -30,19 +37,24 @@ public class LoginCommand implements Command {
     public String execute(HttpServletRequest req, HttpServletResponse resp) {
         String username = req.getParameter(USERNAME);
         String password = req.getParameter(PASSWORD);
-        Optional<String> savedPassword = UserDao.getInstance().selectPassword(username);
-
-        if (savedPassword.isPresent()) {
-            if (!Cryptographer.check(password, savedPassword.get())) {
+        try {
+            if (!UserService.getInstance().checkUser(username, password)) {
                 req.setAttribute(ERROR, PASSWORD_ERROR);
                 return LOGIN_PAGE;
             }
-        } else {
+        } catch (ServiceException e) {
+            log.log(Level.ERROR, "ERROR: {}", e.getMessage(), e);
             req.setAttribute(ERROR, USERNAME_ERROR);
             return LOGIN_PAGE;
         }
 
-        Optional<User> userOptional = UserDao.getInstance().selectUserByUsername(username);
+
+        Optional<User> userOptional = Optional.empty();
+        try {
+            userOptional = UserDao.getInstance().selectUserByUsername(username);
+        } catch (DaoException e) {
+            log.log(Level.ERROR, "ERROR: {}", e.getMessage(), e);
+        }
 
         userOptional.ifPresent(user -> {
             req.getSession().setAttribute(USER_ID, user.getUserId());

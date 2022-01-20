@@ -1,5 +1,6 @@
 package by.kosolobov.barbershop.model.dao;
 
+import by.kosolobov.barbershop.exception.DaoException;
 import by.kosolobov.barbershop.model.ConnectionPool;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -112,7 +113,7 @@ public class DaoBuilder {
         return this;
     }
 
-    public boolean execute() {
+    public boolean execute() throws DaoException {
         builder.append(";");
         log.log(Level.INFO, "Executing:\n    {}", builder);
 
@@ -121,7 +122,7 @@ public class DaoBuilder {
             statement.execute(builder.toString());
         } catch (SQLException e) {
             log.log(Level.ERROR, "EXECUTE SQL ERROR: {}", e.getMessage(), e);
-            return false;
+            throw new DaoException("SQL exception happened while executing query", e);
         } finally {
             builder.delete(0, builder.length());
         }
@@ -129,7 +130,7 @@ public class DaoBuilder {
         return true;
     }
 
-    public List<Map<String, String>> executeSql(String... columns) {
+    public List<Map<String, String>> executeSql(String... columns) throws DaoException {
         builder.append(";");
         List<Map<String, String>> result = new ArrayList<>();
         log.log(Level.INFO, "Executing:\n    {}", builder);
@@ -147,6 +148,7 @@ public class DaoBuilder {
             }
         } catch (SQLException e) {
             log.log(Level.ERROR, "EXECUTE SQL ERROR: {}", e.getMessage(), e);
+            throw new DaoException("SQL exception happened while executing query", e);
         } finally {
             builder.delete(0, builder.length());
         }

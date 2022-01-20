@@ -1,67 +1,84 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ include file="../../imports.jspf"%>
+<fmt:message key="client.person.title" var="title"/>
+<fmt:message key="client.person.user_id" var="user_id"/>
+<fmt:message key="client.person.username" var="username"/>
+<fmt:message key="client.person.status" var="status"/>
+<fmt:message key="client.person.first_name" var="first_name"/>
+<fmt:message key="client.person.second_name" var="second_name"/>
+<fmt:message key="client.person.surname" var="surname"/>
+<fmt:message key="client.person.email" var="email"/>
+<fmt:message key="client.person.phone" var="phone"/>
+<fmt:message key="client.person.book.show_book" var="show_book"/>
+<fmt:message key="client.person.book.add_book" var="add_book"/>
+<fmt:message key="client.person.book.barber" var="barber"/>
+<fmt:message key="client.person.book.service" var="service"/>
+<fmt:message key="client.person.book.date" var="date"/>
+<fmt:message key="client.person.book.time" var="time"/>
+<fmt:message key="client.person.book.state" var="state"/>
+<fmt:message key="client.person.book.state.active" var="active"/>
+<fmt:message key="client.person.book.state.inactive" var="inactive"/>
+<fmt:message key="client.person.book.no_books" var="no_books"/>
 <!DOCTYPE>
-<html lang="en">
+<html>
 <head>
-    <title>Personal Area</title>
+    <title>${title}</title>
 </head>
 <body>
 <form action="controller" method="post">
-    User ID: ${sessionScope.user_id}
+    ${user_id}: ${sessionScope.user_id}
     <br/>
-    Username: ${sessionScope.username}
+    ${username}: ${sessionScope.username}
     <br/>
-    Status: ${sessionScope.user_role}
+    ${status}: ${sessionScope.user_role}
     <br/>
-    First name: ${sessionScope.first_name}
+    ${first_name}: ${sessionScope.first_name}
     <br/>
-    Second name: ${sessionScope.second_name}
+    ${second_name}: ${sessionScope.second_name}
     <br/>
-    Surname: ${sessionScope.sur_name}
+    ${surname}: ${sessionScope.sur_name}
     <br/>
-    Email: ${sessionScope.user_email}
+    ${email}: ${sessionScope.user_email}
     <br/>
-    Phone: ${sessionScope.user_phone}
+    ${phone}: ${sessionScope.user_phone}
     <br/>
-    Description: ${sessionScope.user_desc}
-    <br/>
-    <input type='submit' value='Booking'>
+    <input type='submit' value='${show_book}'>
     <input type="text" name="command" value="SHOW_CLIENT_BOOK" hidden>
 </form>
-<form action="controller" method="post">
-    <input type="submit" value="Add book">
-    <input type="text" name="command" value="ADD_BOOK" hidden>
-</form>
-<c:if test="${requestScope.items != null}">
-<table>
-    <thead>
-    <tr>
-        <th>Client ID</th>
-        <th>Barber ID</th>
-        <th>Service ID</th>
-        <th>Date</th>
-        <th>Time</th>
-        <th>Status</th>
-    </tr>
-    </thead>
-    <tbody>
-    <c:forEach items="${requestScope.items}" var="item">
-        <tr>
-            <td>${item.clientId}</td>
-            <td>${item.barberId}</td>
-            <td>${item.serviceId}</td>
-            <td>${item.bookDate}</td>
-            <td>${item.bookTime}</td>
-            <td>${item.active}</td>
-        </tr>
-    </c:forEach>
-    </tbody>
-    <tfoot>
-    <tr>
-        <td colspan="6">Total books: ${requestScope.items.size()}</td>
-    </tr>
-    </tfoot>
-</table>
-</c:if>
+<c:choose>
+    <c:when test="${requestScope.books.size() > 0}">
+        <table>
+            <thead>
+            <tr>
+                <th>${barber}</th>
+                <th>${service}</th>
+                <th>${date}</th>
+                <th>${time}</th>
+                <th>${state}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <c:forEach items="${requestScope.books}" var="book">
+                <tr>
+                    <td>${book.barberId}</td>
+                        <%--todo: make barber clickable--%>
+                    <td>${book.serviceId}</td>
+                    <td>${book.bookDate}</td>
+                    <td>${book.bookTime}</td>
+                    <td>${book.active? active : inactive}</td>
+                </tr>
+            </c:forEach>
+            </tbody>
+        </table>
+    </c:when>
+    <c:when test="${requestScope.books.size() == 0}">
+        <label>
+            ${no_books}
+            <form action="controller" method="post">
+                <input type="submit" value="${add_book}">
+                <input type="text" name="command" value="ADD_BOOK_MENU" hidden>
+            </form>
+        </label>
+    </c:when>
+</c:choose>
 </body>
 </html>

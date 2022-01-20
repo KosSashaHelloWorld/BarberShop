@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static by.kosolobov.barbershop.model.sql.DatabaseNameBox.*;
+import static by.kosolobov.barbershop.model.dao.DatabaseNameBox.*;
 
 public class EntityMapper {
     public static List<User> mapUser(List<Map<String, String>> data) {

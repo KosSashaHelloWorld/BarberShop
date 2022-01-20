@@ -1,4 +1,4 @@
-package by.kosolobov.barbershop.model.sql;
+package by.kosolobov.barbershop.model.dao;
 
 public final class DatabaseNameBox {
     //--------------------------- TABLES ---------------------------//
@@ -35,7 +35,7 @@ public final class DatabaseNameBox {
     public static final String COLUMN_CERT_FILE_NAME = "certificate_file_name";
     public static final String COLUMN_CERT_CHECKED = "certificate_checked";
 
-    public static final String[] COLUMNS_USER = {COLUMN_USER_ID, COLUMN_USERNAME, COLUMN_PASSWORD, COLUMN_USER_ROLE,
+    public static final String[] COLUMNS_USER = {COLUMN_USER_ID, COLUMN_USERNAME, COLUMN_USER_ROLE,
             COLUMN_FIRST_NAME, COLUMN_SECOND_NAME, COLUMN_SUR_NAME, COLUMN_EMAIL, COLUMN_PHONE, COLUMN_DESC};
     public static final String[] COLUMNS_USER_MIN = {COLUMN_USERNAME, COLUMN_PASSWORD, COLUMN_USER_ROLE};
     public static final String[] COLUMNS_SERVICE = {COLUMN_SERVICE_ID, COLUMN_SERVICE_NAME};

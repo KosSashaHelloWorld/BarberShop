@@ -9,6 +9,7 @@ import by.kosolobov.barbershop.controller.command.impl.client.DeleteUserCommand;
 import by.kosolobov.barbershop.controller.command.impl.client.ShowClientBooksCommand;
 import by.kosolobov.barbershop.controller.command.impl.navigation.LoginMenuCommand;
 import by.kosolobov.barbershop.controller.command.impl.navigation.SignupMenuCommand;
+import by.kosolobov.barbershop.controller.command.impl.navigation.client.AddBookMenuCommand;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,7 +23,8 @@ public enum CommandType {
     LOGIN(new LoginCommand()),
     SIGNUP(new SignupCommand()),
     LOGIN_MENU(new LoginMenuCommand()),
-    SIGNUP_MENU(new SignupMenuCommand());
+    SIGNUP_MENU(new SignupMenuCommand()),
+    ADD_BOOK_MENU(new AddBookMenuCommand());
 
     private static final Logger log = LogManager.getLogger(CommandType.class);
     private static final String DEFAULT_ERROR_COMMAND = "ILLEGAL_NAME";

@@ -1,5 +1,6 @@
 package by.kosolobov.barbershop.model.dao;
 
+import by.kosolobov.barbershop.exception.DaoException;
 import by.kosolobov.barbershop.model.entity.Service;
 import by.kosolobov.barbershop.model.mapper.EntityMapper;
 import org.apache.logging.log4j.LogManager;
@@ -8,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static by.kosolobov.barbershop.model.sql.DatabaseNameBox.*;
+import static by.kosolobov.barbershop.model.dao.DatabaseNameBox.*;
 
 public class UtilDao {
     private static final Logger log = LogManager.getLogger(UtilDao.class);
@@ -28,7 +29,7 @@ public class UtilDao {
 
     private UtilDao() {}
 
-    public List<Service> selectBarberServices(int barberId) {
+    public List<Service> selectBarberServices(int barberId) throws DaoException {
         DaoBuilder dao = new DaoBuilder();
 
         return EntityMapper.mapServiceFull(dao.select(TABLE_BARBER_HAS_SERVICE, "*")

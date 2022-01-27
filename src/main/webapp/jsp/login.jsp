@@ -12,6 +12,7 @@
     <title>${title}</title>
 </head>
 <body>
+<h1>Log In</h1>
 <form method="post" action="controller">
     <label for="username">${username}</label>
     <input type="text" name="username" id="username" placeholder="${username}" required>

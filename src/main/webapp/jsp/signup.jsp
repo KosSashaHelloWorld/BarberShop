@@ -69,7 +69,8 @@
     <br/>
     <input type="submit" value="${signup}">
     <input type="hidden" name="command" value="SIGNUP">
-    <input type="hidden" name="user_role" value="client">
+    <input type="hidden" name="user_role" value="CLIENT">
+<%--    todo add client/barber validation--%>
 </form>
 </body>
 </html>

@@ -2,7 +2,9 @@ package by.kosolobov.barbershop.controller.command.impl;
 
 import by.kosolobov.barbershop.controller.command.Command;
 import by.kosolobov.barbershop.exception.ServiceException;
+import by.kosolobov.barbershop.model.entity.User;
 import by.kosolobov.barbershop.model.service.UserService;
+import by.kosolobov.barbershop.model.service.impl.UserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.Level;
@@ -18,15 +20,16 @@ public class SignupCommand implements Command {
     private static final String SERVICE_ERROR = "service_error";
     private static final String USERNAME_NOT_VALID = "username_not_valid";
     private static final String SIGNUP_NOT_COMPLETE = "signup_not_complete";
-    private static final String UPDATE_NOT_COMPLETE = "update_not_complete";
     private static final String USERNAME_ERROR = "username_error";
     private static final String NOT_UNIQUE = "not_unique";
 
     @Override
     public String execute(HttpServletRequest req, HttpServletResponse resp) {
-        UserService service = UserService.getInstance();
+        UserService service = UserServiceImpl.getInstance();
 
+        //checking same user already exist
         String username = req.getParameter(USERNAME);
+        String password = req.getParameter(PASSWORD);
         try {
             if (!service.uniqueUsername(username)) {
                 req.setAttribute(USERNAME_ERROR, NOT_UNIQUE);
@@ -37,38 +40,36 @@ public class SignupCommand implements Command {
             req.setAttribute(SERVICE_ERROR, USERNAME_NOT_VALID);
             return SIGNUP_PAGE;
         }
-        String password = req.getParameter(PASSWORD);
-        String role = req.getParameter(USER_ROLE);
 
+        //getting other users' attributes
+        User user = new User();
+        user.setUsername(username);
+        user.setUserRole(User.Role.valueOf(req.getParameter(USER_ROLE)));
+        user.setFirstName(req.getParameter(FIRST_NAME));
+        user.setSecondName(req.getParameter(SECOND_NAME));
+        user.setSurname(req.getParameter(SURNAME));
+        user.setEmail(req.getParameter(EMAIL));
+        user.setPhone(req.getParameter(PHONE));
+        user.setDescription(req.getParameter(DESCRIPTION));
+
+        //adding user to database
         try {
-            service.signupUser(username, password, role);
+            service.signupUser(user, password);
         } catch (ServiceException e) {
-            log.log(Level.ERROR, "Service exception happened while signing up user: {}", e.getMessage(), e);
+            log.log(Level.ERROR, "ERROR: {}", e.getMessage(), e);
             req.setAttribute(SERVICE_ERROR, SIGNUP_NOT_COMPLETE);
             return SIGNUP_PAGE;
         }
 
-        String firstName = req.getParameter(FIRST_NAME);
-        String secondName = req.getParameter(SECOND_NAME);
-        String surname = req.getParameter(SUR_NAME);
-        String email = req.getParameter(EMAIL);
-        String phone = req.getParameter(PHONE);
-
-        try {
-            service.updateUser(username, firstName, secondName, surname, email, phone);
-        } catch (ServiceException e) {
-            log.log(Level.ERROR, "Service exception happened while updating user: {}", e.getMessage(), e);
-            req.setAttribute(SERVICE_ERROR, UPDATE_NOT_COMPLETE);
-            return SIGNUP_PAGE;
-        }
-
-        req.getSession().setAttribute(USERNAME, username);
-        req.getSession().setAttribute(USER_ROLE, role);
-        req.getSession().setAttribute(FIRST_NAME, firstName);
-        req.getSession().setAttribute(SECOND_NAME, secondName);
-        req.getSession().setAttribute(SUR_NAME, surname);
-        req.getSession().setAttribute(EMAIL, email);
-        req.getSession().setAttribute(PHONE, phone);
+        //adding users' attributes to users' session
+        req.getSession().setAttribute(USERNAME, user.getUsername());
+        req.getSession().setAttribute(USER_ROLE, user.getUserRole());
+        req.getSession().setAttribute(FIRST_NAME, user.getFirstName());
+        req.getSession().setAttribute(SECOND_NAME, user.getSecondName());
+        req.getSession().setAttribute(SURNAME, user.getSurname());
+        req.getSession().setAttribute(EMAIL, user.getEmail());
+        req.getSession().setAttribute(PHONE, user.getPhone());
+        req.getSession().setAttribute(DESCRIPTION, user.getDescription());
 
         return PROFILE_PAGE;
     }

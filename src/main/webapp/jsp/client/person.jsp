@@ -1,6 +1,5 @@
 <%@ include file="../../imports.jspf"%>
 <fmt:message key="client.person.title" var="title"/>
-<fmt:message key="client.person.user_id" var="user_id"/>
 <fmt:message key="client.person.username" var="username"/>
 <fmt:message key="client.person.status" var="status"/>
 <fmt:message key="client.person.first_name" var="first_name"/>
@@ -25,8 +24,6 @@
 </head>
 <body>
 <form action="controller" method="post">
-    ${user_id}: ${sessionScope.user_id}
-    <br/>
     ${username}: ${sessionScope.username}
     <br/>
     ${status}: ${sessionScope.user_role}
@@ -35,11 +32,11 @@
     <br/>
     ${second_name}: ${sessionScope.second_name}
     <br/>
-    ${surname}: ${sessionScope.sur_name}
+    ${surname}: ${sessionScope.surname}
     <br/>
-    ${email}: ${sessionScope.user_email}
+    ${email}: ${sessionScope.email}
     <br/>
-    ${phone}: ${sessionScope.user_phone}
+    ${phone}: ${sessionScope.phone}
     <br/>
     <input type='submit' value='${show_book}'>
     <input type="text" name="command" value="SHOW_CLIENT_BOOK" hidden>

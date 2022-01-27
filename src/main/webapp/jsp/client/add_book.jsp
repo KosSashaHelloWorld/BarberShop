@@ -5,6 +5,64 @@
     <title>${title}</title>
 </head>
 <body>
-<%--todo: make book registration page--%>
+<form action="controller" method="post">
+    <table>
+        <thead>
+            <tr>
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+                <th>Saturday</th>
+                <th>Sunday</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+<%--                todo make add book interface and add calendar--%>
+                <td></td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="7"></td>
+            </tr>
+        </tfoot>
+    </table>
+</form>
 </body>
 </html>

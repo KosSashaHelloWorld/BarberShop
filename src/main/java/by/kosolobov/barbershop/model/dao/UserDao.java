@@ -2,126 +2,34 @@ package by.kosolobov.barbershop.model.dao;
 
 import by.kosolobov.barbershop.exception.DaoException;
 import by.kosolobov.barbershop.model.entity.User;
-import by.kosolobov.barbershop.model.mapper.EntityMapper;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.locks.ReentrantLock;
 
-import static by.kosolobov.barbershop.model.dao.DatabaseNameBox.*;
+public interface UserDao {
+    boolean deleteUser(String username, String password) throws DaoException;
 
-public class UserDao {
-    private static final Logger log = LogManager.getLogger(UserDao.class);
-    private static final ReentrantLock lock = new ReentrantLock();
-    private static final String BARBER_ROLE = "barber";
-    private static UserDao instance;
-    private final DaoBuilder dao = new DaoBuilder();
+    boolean insertUser(User user, String password) throws DaoException;
 
-    public static UserDao getInstance() {
-        if (instance == null) {
-            lock.lock();
-            if (instance == null) {
-                instance = new UserDao();
-            }
-            lock.unlock();
-        }
-        return instance;
-    }
+    List<User> selectAllBarbers() throws DaoException;
 
-    private UserDao() {}
+    Optional<String> selectPassword(String username) throws DaoException;
 
-    public List<User> selectAllBarbers() throws DaoException {
-        return EntityMapper.mapUser(dao.select(TABLE_USER, COLUMNS_USER)
-                .where(COLUMN_USER_ROLE, BARBER_ROLE)
-                .executeSql(COLUMNS_USER));
-    }
+    Optional<User> selectUserByUsername(String username) throws DaoException;
 
-    public Optional<User> selectUserByUsername(String username) throws DaoException {
-        try {
-            List<User> res = EntityMapper.mapUser(dao.select(TABLE_USER, COLUMNS_USER)
-                    .where(COLUMN_USERNAME, username)
-                    .executeSql(COLUMNS_USER));
+    boolean updateEmail(String username, String email) throws DaoException;
 
-            if (!res.isEmpty()) {
-                return Optional.of(res.get(0));
-            }
+    boolean updateFirstName(String username, String firstName) throws DaoException;
 
-        } catch (IndexOutOfBoundsException e) {
-            log.log(Level.ERROR, "SELECT: User {} does not exist: {}", username, e.getMessage(), e);
-        }
+    boolean updatePassword(String username, String oldPassword, String newPassword) throws DaoException;
 
-        return Optional.empty();
-    }
+    boolean updatePhone(String username, String phone) throws DaoException;
 
-    public Optional<String> selectPassword(String username) throws DaoException {
-        List<Map<String, String>> entities = dao.select(TABLE_USER, COLUMN_PASSWORD)
-                .where(COLUMN_USERNAME, username)
-                .executeSql(COLUMN_PASSWORD);
-        if (!entities.isEmpty()) {
-            return Optional.of(entities.get(0).get(COLUMN_PASSWORD));
-        } else {
-            log.log(Level.ERROR, "User {} has no password!", username);
-            return Optional.empty();
-        }
-    }
+    boolean updateSecondName(String username, String secondName) throws DaoException;
 
-    public boolean updatePassword(String username, String oldPass, String newPass) throws DaoException {
-        return dao.update(TABLE_USER)
-                .set(COLUMN_PASSWORD, newPass)
-                .where(COLUMN_USERNAME, username)
-                .andWhere(COLUMN_PASSWORD, oldPass)
-                .execute();
-    }
+    boolean updateSurname(String username, String surname) throws DaoException;
 
-    public boolean updateUsername(String oldUsername, String newUsername) throws DaoException {
-        return updateUser(oldUsername, COLUMN_USERNAME, newUsername);
-    }
+    boolean updateDescription(String username, String description) throws DaoException;
 
-    public boolean updateFirstName(String username, String first) throws DaoException {
-        return updateUser(username, COLUMN_FIRST_NAME, first);
-    }
-
-    public boolean updateSecondName(String username, String second) throws DaoException {
-        return updateUser(username, COLUMN_SECOND_NAME, second);
-    }
-
-    public boolean updateSurName(String username, String sur) throws DaoException {
-        return updateUser(username, COLUMN_SUR_NAME, sur);
-    }
-
-    public boolean updateEmail(String username, String email) throws DaoException {
-        return updateUser(username, COLUMN_EMAIL, email);
-    }
-
-    public boolean updatePhone(String username, String phone) throws DaoException {
-        return updateUser(username, COLUMN_PHONE, phone);
-    }
-
-    public boolean updateUserDesc(String username, String desc) throws DaoException {
-        return updateUser(username, COLUMN_DESC, desc);
-    }
-
-    private boolean updateUser(String username, String column, String value) throws DaoException {
-        return dao.update(TABLE_USER)
-                .set(column, value)
-                .where(COLUMN_USERNAME, username)
-                .execute();
-    }
-
-    public boolean insertUser(String username, String password, String userRole) throws DaoException {
-        return dao.insert(TABLE_USER, COLUMNS_USER_MIN)
-                .values(username, password, userRole)
-                .execute();
-    }
-
-    public boolean deleteUser(String username, String password) throws DaoException {
-        return dao.delete(TABLE_USER)
-                .where(COLUMN_USERNAME, username)
-                .andWhere(COLUMN_PASSWORD, password)
-                .execute();
-    }
+    boolean updateUsername(String oldUsername, String newUsername) throws DaoException;
 }

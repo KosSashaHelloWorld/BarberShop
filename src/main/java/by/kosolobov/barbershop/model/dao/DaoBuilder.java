@@ -2,19 +2,19 @@ package by.kosolobov.barbershop.model.dao;
 
 import by.kosolobov.barbershop.exception.DaoException;
 import by.kosolobov.barbershop.model.ConnectionPool;
+import by.kosolobov.barbershop.util.validator.SqlValidator;
+import com.mysql.cj.jdbc.result.ResultSetImpl;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
 
 public class DaoBuilder {
     private static final Logger log = LogManager.getLogger(DaoBuilder.class);
-    final StringBuilder builder = new StringBuilder();
+    private final StringBuilder builder = new StringBuilder();
+    private final List<String> params = new ArrayList<>();
 
     public DaoBuilder select(String table, String... columns) {
         builder.append("SELECT");
@@ -53,13 +53,15 @@ public class DaoBuilder {
     }
 
     public DaoBuilder where(String column, String value) {
-        builder.append("WHERE %s = '%s' ".formatted(column, value));
+        params.add(value);
+        builder.append("WHERE %s = ? ".formatted(column));
 
         return this;
     }
 
     public DaoBuilder andWhere(String column, String value) {
-        builder.append("AND %s = '%s' ".formatted(column, value));
+        params.add(value);
+        builder.append("AND %s = ? ".formatted(column));
 
         return this;
     }
@@ -68,7 +70,8 @@ public class DaoBuilder {
         builder.append("VALUES (");
 
         for (String val : values) {
-            builder.append(" '%s',".formatted(val));
+            params.add(val);
+            builder.append(" ?,");
         }
         builder.deleteCharAt(builder.length() - 1);
 
@@ -78,13 +81,15 @@ public class DaoBuilder {
     }
 
     public DaoBuilder set(String column, String value) {
-        builder.append("SET %s = '%s' ".formatted(column, value));
+        params.add(value);
+        builder.append("SET %s = ? ".formatted(column));
 
         return this;
     }
 
     public DaoBuilder andSet(String column, String value) {
-        builder.append(", %s = %s ".formatted(column, value));
+        params.add(value);
+        builder.append(", %s = ? ".formatted(column));
 
         return this;
     }
@@ -115,16 +120,24 @@ public class DaoBuilder {
 
     public boolean execute() throws DaoException {
         builder.append(";");
-        log.log(Level.INFO, "Executing:\n    {}", builder);
+
+        String validQuery = SqlValidator.getValidQuery(builder.toString());
+
+        log.log(Level.INFO, "\n\nExecuting:\n    {}\nWith parameters:\n    {}\n", validQuery, params);
 
         try (Connection connection = ConnectionPool.getInstance().getConnection();
-             Statement statement = connection.createStatement()) {
-            statement.execute(builder.toString());
+             PreparedStatement statement = connection.prepareStatement(validQuery)) {
+            int i = 1;
+            for (String value : params) {
+                statement.setString(i++, value);
+            }
+            statement.execute(validQuery);
         } catch (SQLException e) {
             log.log(Level.ERROR, "EXECUTE SQL ERROR: {}", e.getMessage(), e);
             throw new DaoException("SQL exception happened while executing query", e);
         } finally {
             builder.delete(0, builder.length());
+            params.clear();
         }
 
         return true;
@@ -132,25 +145,33 @@ public class DaoBuilder {
 
     public List<Map<String, String>> executeSql(String... columns) throws DaoException {
         builder.append(";");
+
+        String validQuery = SqlValidator.getValidQuery(builder.toString());
+
         List<Map<String, String>> result = new ArrayList<>();
-        log.log(Level.INFO, "Executing:\n    {}", builder);
+        log.log(Level.INFO, "\n\nExecuting:\n    {}\nWith parameters:\n    {}\n", validQuery, params);
 
         try (Connection connection = ConnectionPool.getInstance().getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(builder.toString())) {
-
-            while (resultSet.next()) {
-                Map<String, String> map = new HashMap<>();
-                for (String column : columns) {
-                    map.put(column, resultSet.getString(column));
+             PreparedStatement statement = connection.prepareStatement(validQuery)) {
+            int i = 1;
+            for (String value : params) {
+                statement.setString(i++, value);
+            }
+            try (ResultSet resultSet = statement.executeQuery()){
+                while (resultSet.next()) {
+                    Map<String, String> map = new HashMap<>();
+                    for (String column : columns) {
+                        map.put(column, resultSet.getString(column));
+                    }
+                    result.add(map);
                 }
-                result.add(map);
             }
         } catch (SQLException e) {
             log.log(Level.ERROR, "EXECUTE SQL ERROR: {}", e.getMessage(), e);
             throw new DaoException("SQL exception happened while executing query", e);
         } finally {
             builder.delete(0, builder.length());
+            params.clear();
         }
 
         return result;
